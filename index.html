@@ -488,6 +488,16 @@ async function postComment(gameId, text){
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 }
+async function deleteComment(commentId, gameId){
+  if(!confirm('Supprimer ce commentaire ?')) return;
+  try{
+    await db.collection('comments').doc(commentId).delete();
+    await loadAndRenderComments(gameId);
+  }catch(e){
+    console.error('Erreur suppression commentaire:', e);
+    alert("Suppression impossible : " + (e.message || e.code || e));
+  }
+}
 
 /* ============================================================
    OUTILS DE SESSION
@@ -956,12 +966,17 @@ async function loadAndRenderComments(gameId){
   const list = document.getElementById('commentList');
   try{
     const comments = await loadComments(gameId);
+    const canManage = c => currentUser && (currentRole === 'admin' || c.uid === currentUser.uid);
     list.innerHTML = comments.length ? comments.map(c => `
       <div class="comment">
         <div class="author">${escapeHtml(c.authorEmail || 'Anonyme')}<span class="date">${formatDate(c.createdAt)}</span></div>
         <div>${escapeHtml(c.text)}</div>
+        ${canManage(c) ? `<button class="io-btn" data-delcomment="${c.id}">Supprimer</button>` : ''}
       </div>
     `).join('') : '<p style="color:var(--parchment-dim)">Aucun retour pour l\'instant — sois le premier.</p>';
+    list.querySelectorAll('[data-delcomment]').forEach(btn => {
+      btn.addEventListener('click', () => deleteComment(btn.getAttribute('data-delcomment'), gameId));
+    });
   }catch(e){
     console.error('Erreur chargement commentaires:', e);
     list.innerHTML = '<p style="color:var(--parchment-dim)">Impossible de charger les commentaires pour le moment. (' + escapeHtml(e.message || e.code || e) + ')</p>';
