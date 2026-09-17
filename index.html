@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Taverne de Goulven</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- ============================================================
+  CONFIGURATION FIREBASE À REMPLACER
+  Colle ici l'objet firebaseConfig donné par la console Firebase
+  (Paramètres du projet → tes applis → config). Tant que ce n'est
+  pas fait, le site affichera un message d'avertissement.
+============================================================= -->
+<script>
+  window.FIREBASE_CONFIG = {
+    apiKey: "REMPLACE_MOI",
+    authDomain: "REMPLACE_MOI",
+    projectId: "REMPLACE_MOI",
+    storageBucket: "REMPLACE_MOI",
+    messagingSenderId: "REMPLACE_MOI",
+    appId: "REMPLACE_MOI"
+  };
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+<style>
+  :root{
+    --wood: #231911;
+    --wood-light: #2E2216;
+    --panel: #35281A;
+    --line: rgba(237,224,200,0.12);
+    --parchment: #EDE0C8;
+    --parchment-dim: #B3A48A;
+    --candle: #D9A441;
+    --candle-dim: #7A5B26;
+    --danger: #B24A3D;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background: var(--wood); color: var(--parchment);
+    font-family:'Inter', sans-serif; line-height:1.55;
+  }
+  h1,h2,h3,.display{ font-family:'Cormorant Garamond', serif; font-weight:600; }
+  a{ color:inherit; }
+  button, input, textarea{ font-family:'Inter', sans-serif; }
+  button{ cursor:pointer; }
+  :focus-visible{ outline: 2px solid var(--candle); outline-offset:2px; }
+
+  .topbar{
+    position:sticky; top:0; z-index:10;
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    padding:1rem 1.6rem; background:rgba(35,25,17,0.92); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line); flex-wrap:wrap;
+  }
+  .brand{ font-size:1.3rem; text-decoration:none; }
+  .brand span{ color:var(--candle); }
+  .auth-zone{ display:flex; align-items:center; gap:0.8rem; font-size:0.85rem; flex-wrap:wrap; }
+  .role-badge{
+    font-size:0.72rem; padding:0.2rem 0.55rem; border-radius:10px;
+    background:var(--panel); border:1px solid var(--line); color:var(--parchment-dim);
+  }
+  .role-badge.admin{ color:var(--candle); border-color:var(--candle); }
+  .btn{
+    background:var(--panel); border:1px solid var(--line); color:var(--parchment);
+    padding:0.5rem 0.9rem; border-radius:6px; font-size:0.85rem;
+  }
+  .btn:hover{ border-color:var(--candle); }
+  .btn.primary{ background:var(--candle); color:#231910; border-color:var(--candle); font-weight:600; }
+  .btn.danger{ border-color:var(--danger); color:var(--danger); }
+
+  main{ max-width:1000px; margin:0 auto; padding:0 1.6rem 4rem; }
+
+  .config-warning{
+    background: rgba(178,74,61,0.15); border:1px solid var(--danger); color:#F0C9C2;
+    padding:1rem 1.2rem; border-radius:6px; margin:1.5rem 0; font-size:0.9rem;
+  }
+
+  .hero{ padding:3rem 0 2rem; }
+  .hero h1{ font-size:clamp(2rem,4.5vw,3rem); }
+  .hero p{ color:var(--parchment-dim); max-width:56ch; margin-top:0.6rem; }
+
+  .search-row{ display:flex; gap:0.8rem; margin:1.5rem 0 2rem; flex-wrap:wrap; }
+  .search-row input{
+    flex:1; min-width:220px; background:var(--panel); border:1px solid var(--line); color:var(--parchment);
+    padding:0.6rem 1rem; border-radius:6px; font-size:0.9rem;
+  }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:1.2rem; }
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    padding:1.1rem 1.2rem; text-decoration:none; color:var(--parchment); display:block;
+  }
+  .card:hover{ border-color:var(--candle); }
+  .card .eyebrow{ font-size:0.75rem; color:var(--candle); margin-bottom:0.3rem; }
+  .card h3{ font-size:1.2rem; margin-bottom:0.3rem; }
+  .card .sys{ font-size:0.82rem; color:var(--parchment-dim); }
+
+  .back-link{ display:inline-block; margin:2rem 0 1rem; color:var(--parchment-dim); text-decoration:none; font-size:0.9rem; }
+  .back-link:hover{ color:var(--parchment); }
+
+  .sheet{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:1.8rem; margin-bottom:2rem;
+  }
+  .sheet h2{ font-size:1.8rem; margin-bottom:0.3rem; }
+  .sheet .tagline{ font-style:italic; color:var(--parchment-dim); margin-bottom:1rem; }
+  .sheet p.desc{ color:var(--parchment-dim); max-width:64ch; margin-bottom:1.2rem; }
+  .meta-row{ display:flex; gap:1.6rem; flex-wrap:wrap; margin-bottom:1rem; }
+  .meta-item{ border-left:2px solid var(--candle); padding-left:0.6rem; }
+  .meta-item dt{ font-size:0.72rem; color:var(--parchment-dim); }
+  .meta-item dd{ font-size:0.9rem; }
+  .sheet .ext-link{ font-size:0.88rem; border-bottom:1px solid var(--candle); padding-bottom:2px; text-decoration:none; }
+
+  .comments{ margin-top:2rem; }
+  .tools{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:1.6rem; margin-bottom:2rem;
+  }
+  .tools h3{ font-size:1.3rem; margin-bottom:0.4rem; }
+  .tools .tools-note{ font-size:0.8rem; color:var(--parchment-dim); margin-bottom:1.2rem; }
+  .dice-row{ display:flex; align-items:center; gap:0.7rem; flex-wrap:wrap; margin-bottom:1.2rem; }
+  .dice-row select, .dice-row input[type=number]{
+    background:var(--wood-light); border:1px solid var(--line); color:var(--parchment);
+    padding:0.5rem 0.7rem; border-radius:6px; font-size:0.88rem;
+  }
+  .dice-row input[type=number]{ width:60px; }
+  .dice-result{ font-family:'Cormorant Garamond', serif; font-size:1.5rem; min-width:2ch; }
+  .dice-detail{ font-size:0.78rem; color:var(--parchment-dim); }
+  .gen-row{ display:flex; gap:0.7rem; margin-bottom:0.8rem; flex-wrap:wrap; }
+  .gen-out{
+    background:var(--wood-light); border:1px dashed var(--line); border-radius:6px;
+    padding:0.8rem 1rem; font-size:0.86rem; color:var(--parchment-dim); min-height:2.2em;
+  }
+  .music-add{ display:flex; gap:0.6rem; margin-bottom:1rem; flex-wrap:wrap; }
+  .music-add input{
+    flex:1; min-width:180px; background:var(--wood-light); border:1px solid var(--line); color:var(--parchment);
+    padding:0.5rem 0.8rem; border-radius:6px; font-size:0.86rem;
+  }
+  .track-row{
+    display:flex; align-items:center; gap:0.8rem; background:var(--wood-light); border:1px solid var(--line);
+    border-radius:6px; padding:0.6rem 0.8rem; margin-bottom:0.5rem;
+  }
+  .track-row.playing{ border-color:var(--candle); }
+  .track-toggle{
+    width:30px; height:30px; border-radius:50%; border:1px solid var(--line); background:var(--panel);
+    color:var(--parchment-dim); font-size:0.8rem; flex-shrink:0;
+  }
+  .track-row.playing .track-toggle{ background:var(--candle); color:#231910; border-color:var(--candle); }
+  .track-name{ flex:1; font-size:0.85rem; }
+  .track-vol{ width:100px; }
+  .track-vol input{ width:100%; accent-color:var(--candle); }
+  .track-remove{ background:none; border:none; color:var(--parchment-dim); font-size:0.9rem; }
+  .track-remove:hover{ color:var(--danger); }
+  .ext-track-row{
+    display:flex; align-items:center; justify-content:space-between; gap:0.8rem;
+    background:var(--wood-light); border:1px dashed var(--line); border-radius:6px;
+    padding:0.6rem 0.8rem; margin-bottom:0.5rem; font-size:0.85rem;
+  }
+  .comments h3{ font-size:1.3rem; margin-bottom:1rem; }
+  .comment{
+    border-top:1px solid var(--line); padding:0.9rem 0; font-size:0.88rem;
+  }
+  .comment .author{ color:var(--candle); font-size:0.8rem; margin-bottom:0.2rem; }
+  .comment .date{ color:var(--parchment-dim); font-size:0.72rem; margin-left:0.5rem; }
+  .comment-form textarea{
+    width:100%; background:var(--wood-light); border:1px solid var(--line); color:var(--parchment);
+    border-radius:6px; padding:0.7rem 0.9rem; font-size:0.88rem; min-height:80px; resize:vertical; margin-bottom:0.6rem;
+  }
+  .comment-note{
+    font-size:0.85rem; color:var(--parchment-dim); border:1px dashed var(--line);
+    padding:0.8rem 1rem; border-radius:6px; margin-top:1rem;
+  }
+
+  .auth-panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:1.6rem;
+    max-width:380px; margin:2rem auto;
+  }
+  .auth-panel h2{ font-size:1.4rem; margin-bottom:1rem; }
+  .auth-panel input{
+    width:100%; background:var(--wood-light); border:1px solid var(--line); color:var(--parchment);
+    padding:0.6rem 0.8rem; border-radius:6px; font-size:0.9rem; margin-bottom:0.7rem;
+  }
+  .auth-panel .switch{ font-size:0.82rem; color:var(--parchment-dim); margin-top:0.8rem; text-align:center; }
+  .auth-panel .switch a{ color:var(--candle); cursor:pointer; text-decoration:underline; }
+  .auth-error{ color:#F0A18C; font-size:0.82rem; margin-bottom:0.6rem; }
+
+  .admin-list{ margin-top:1.5rem; }
+  .admin-row{
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    padding:0.8rem 1rem; margin-bottom:0.6rem; font-size:0.88rem;
+  }
+  .admin-row .actions{ display:flex; gap:0.5rem; }
+
+  footer{ text-align:center; padding:2.5rem 0; color:var(--parchment-dim); font-size:0.8rem; border-top:1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="#/" class="brand">La <span>Taverne</span> de Goulven</a>
+  <div class="auth-zone" id="authZone"></div>
+</div>
+
+<main id="app"></main>
+
+<footer>Un lieu pour parler des jeux de rôle qu'on a essayés, avec ceux qui les ont essayés aussi.</footer>
+
+<script>
+/* ============================================================
+   INITIALISATION FIREBASE
+============================================================= */
+let firebaseReady = false;
+let auth, db;
+try{
+  if(window.FIREBASE_CONFIG.apiKey !== "REMPLACE_MOI"){
+    firebase.initializeApp(window.FIREBASE_CONFIG);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    firebaseReady = true;
+  }
+}catch(e){ console.error('Firebase non initialisé', e); }
+
+/* ============================================================
+   ÉTAT GLOBAL
+============================================================= */
+let games = [];
+let currentUser = null;   // { uid, email }
+let currentRole = null;   // 'pending' | 'validated' | 'admin' | null
+let authMode = 'login';   // 'login' | 'signup'
+let pendingUsers = [];
+
+async function loadGames(){
+  try{
+    const res = await fetch('./data.json', { cache: 'no-store' });
+    if(res.ok){ games = await res.json(); }
+  }catch(e){ games = []; }
+}
+
+/* ============================================================
+   AUTH
+============================================================= */
+if(firebaseReady){
+  auth.onAuthStateChanged(async user => {
+    if(user){
+      currentUser = { uid: user.uid, email: user.email };
+      await ensureUserDoc(user);
+      await refreshRole();
+    } else {
+      currentUser = null;
+      currentRole = null;
+    }
+    renderAuthZone();
+    render();
+  });
+}
+
+async function ensureUserDoc(user){
+  const ref = db.collection('users').doc(user.uid);
+  const snap = await ref.get();
+  if(!snap.exists){
+    await ref.set({ email: user.email, role: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }
+}
+async function refreshRole(){
+  const snap = await db.collection('users').doc(currentUser.uid).get();
+  currentRole = snap.exists ? snap.data().role : 'pending';
+}
+
+async function handleSignup(email, password){
+  return auth.createUserWithEmailAndPassword(email, password);
+}
+async function handleLogin(email, password){
+  return auth.signInWithEmailAndPassword(email, password);
+}
+function handleLogout(){
+  auth.signOut();
+}
+
+/* ============================================================
+   ADMIN : validation des comptes
+============================================================= */
+async function loadPendingUsers(){
+  const snap = await db.collection('users').where('role', '==', 'pending').get();
+  pendingUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+async function approveUser(uid){
+  await db.collection('users').doc(uid).update({ role: 'validated' });
+  await loadPendingUsers();
+  render();
+}
+async function rejectUser(uid){
+  if(!confirm('Refuser (et supprimer) cette demande de compte ?')) return;
+  await db.collection('users').doc(uid).delete();
+  await loadPendingUsers();
+  render();
+}
+
+/* ============================================================
+   COMMENTAIRES
+============================================================= */
+async function loadComments(gameId){
+  const snap = await db.collection('comments')
+    .where('gameId', '==', gameId)
+    .orderBy('createdAt', 'desc')
+    .get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+async function postComment(gameId, text){
+  await db.collection('comments').add({
+    gameId,
+    uid: currentUser.uid,
+    authorEmail: currentUser.email,
+    text,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+/* ============================================================
+   RENDU
+============================================================= */
+function renderAuthZone(){
+  const zone = document.getElementById('authZone');
+  if(!firebaseReady){
+    zone.innerHTML = '';
+    return;
+  }
+  if(currentUser){
+    const roleLabel = currentRole === 'admin' ? 'admin' : currentRole === 'validated' ? 'membre' : 'en attente';
+    zone.innerHTML = `
+      <span>${escapeHtml(currentUser.email)}</span>
+      <span class="role-badge ${currentRole === 'admin' ? 'admin' : ''}">${roleLabel}</span>
+      ${currentRole === 'admin' ? '<a href="#/admin" class="btn">Administration</a>' : ''}
+      <button class="btn" id="logoutBtn">Se déconnecter</button>
+    `;
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+  } else {
+    zone.innerHTML = `<a href="#/compte" class="btn primary">Se connecter</a>`;
+  }
+}
+
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatDate(ts){
+  if(!ts || !ts.toDate) return '';
+  return ts.toDate().toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+}
+
+async function render(){
+  const app = document.getElementById('app');
+  const hash = location.hash || '#/';
+
+  if(!firebaseReady){
+    app.innerHTML = `<div class="config-warning">
+      ⚠️ La configuration Firebase n'est pas encore renseignée dans le code (bloc <code>FIREBASE_CONFIG</code> en haut du fichier).
+      Les comptes, la validation admin et les commentaires ne fonctionneront pas tant que ce n'est pas fait — mais le catalogue reste consultable ci-dessous.
+    </div>`;
+  } else {
+    app.innerHTML = '';
+  }
+
+  if(hash === '#/compte'){
+    renderAuthPanel(app);
+  } else if(hash === '#/admin'){
+    await renderAdmin(app);
+  } else if(hash.startsWith('#/g/')){
+    const id = decodeURIComponent(hash.slice(4));
+    const game = games.find(g => g.id === id);
+    if(!game){ location.hash = '#/'; return; }
+    await renderGame(app, game);
+  } else {
+    renderHome(app);
+  }
+}
+
+function renderHome(app){
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <section class="hero">
+      <h1>La Taverne de Goulven</h1>
+      <p>Un catalogue de jeux de rôle, et un coin pour poser ses retours d'expérience — pas besoin de compte pour lire, juste pour parler.</p>
+    </section>
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Chercher un jeu, un genre, un système…">
+    </div>
+    <div class="grid" id="gameGrid"></div>
+  `;
+  app.appendChild(wrap);
+
+  function renderGrid(filter){
+    const f = (filter || '').toLowerCase();
+    const filtered = games.filter(g =>
+      !f || g.title.toLowerCase().includes(f) || (g.meta1||'').toLowerCase().includes(f) || (g.meta2||'').toLowerCase().includes(f)
+    );
+    document.getElementById('gameGrid').innerHTML = filtered.map(g => `
+      <a class="card" href="#/g/${encodeURIComponent(g.id)}">
+        <div class="eyebrow">${escapeHtml(g.meta1 || '')}</div>
+        <h3>${escapeHtml(g.title)}</h3>
+        <div class="sys">${escapeHtml(g.meta2 || '')}</div>
+      </a>
+    `).join('') || '<p style="color:var(--parchment-dim)">Aucun jeu ne correspond à cette recherche.</p>';
+  }
+  renderGrid('');
+  document.getElementById('searchInput').addEventListener('input', e => renderGrid(e.target.value));
+}
+
+/* ============================================================
+   OUTILS DE SESSION (génériques, non spécifiques à un jeu précis)
+============================================================= */
+const DIE_SIZES = [4, 6, 8, 10, 12, 20, 100];
+
+function guessDefaultDie(meta2){
+  const s = (meta2 || '').toLowerCase();
+  for(const size of [100, 20, 12, 10, 8, 6, 4]){
+    if(s.includes('d' + size)) return size;
+  }
+  return 6;
+}
+
+function initSessionTools(game){
+  const dieSelect = document.getElementById('dieType');
+  if(!dieSelect) return;
+
+  const guessed = guessDefaultDie(game.meta2);
+  dieSelect.innerHTML = DIE_SIZES.map(size => `<option value="${size}" ${size === guessed ? 'selected' : ''}>D${size}</option>`).join('');
+
+  document.getElementById('rollBtn').addEventListener('click', () => {
+    const size = Number(dieSelect.value);
+    const count = Math.min(10, Math.max(1, Number(document.getElementById('dieCount').value) || 1));
+    const rolls = Array.from({ length: count }, () => Math.floor(Math.random() * size) + 1);
+    const total = rolls.reduce((a, b) => a + b, 0);
+    document.getElementById('diceResult').textContent = total;
+    document.getElementById('diceDetail').textContent = count > 1 ? `(${rolls.join(' + ')})` : '';
+  });
+
+  const npcTraits = ['méfiant·e', 'bavard·e', 'blessé·e', 'trop confiant·e', 'silencieux·se', 'pressé·e', 'observateur·rice', 'nerveux·se'];
+  const npcRoles = ['un·e marchand·e', 'un·e garde', 'un·e voyageur·se', 'un·e messager·ère', 'un·e artisan·e', 'un·e ancien·ne du coin', 'un·e étranger·ère de passage'];
+  const npcHooks = ["cherche quelque chose qu'il/elle a perdu", "connaît un secret qu'il/elle ne dira pas tout de suite", "doit de l'argent à quelqu'un", "a besoin d'aide mais n'ose pas le demander", "ment sur un détail précis"];
+
+  const locTypes = ["une auberge à moitié vide", "un carrefour animé", "un bâtiment à l'abandon", "un marché improvisé", "un point de passage surveillé", "un lieu de repos oublié de tous"];
+  const locDetails = ["une odeur particulière flotte dans l'air", "quelqu'un observe depuis un coin", "un objet ne devrait pas être là", "le silence y est plus lourd que prévu", "une trace récente indique un passage"];
+
+  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+  document.getElementById('genNpc').addEventListener('click', () => {
+    document.getElementById('genOut').textContent =
+      `${pick(npcRoles)}, ${pick(npcTraits)} — ${pick(npcHooks)}.`;
+  });
+  document.getElementById('genLoc').addEventListener('click', () => {
+    document.getElementById('genOut').textContent =
+      `${pick(locTypes)} : ${pick(locDetails)}.`;
+  });
+}
+
+/* ============================================================
+   AMBIANCE SONORE (bêta) — fichiers audio directs mixables,
+   autres liens (YouTube, Spotify...) en simple ouverture externe.
+   État éphémère : pas de sauvegarde, remis à zéro au rechargement.
+============================================================= */
+let mixChannels = []; // { id, label, url, audioEl, volume }
+let extLinks = [];    // { id, label, url }
+
+function isDirectAudioUrl(url){
+  return /\.(mp3|ogg|wav|m4a)(\?.*)?$/i.test(url.trim());
+}
+
+function initAmbianceMixer(){
+  mixChannels.forEach(c => { c.audioEl.pause(); });
+  mixChannels = [];
+  extLinks = [];
+  renderMixTracks();
+  renderExtTracks();
+
+  function addMixChannel(label, url){
+    const audioEl = new Audio(url);
+    audioEl.loop = true;
+    audioEl.volume = 0.7;
+    mixChannels.push({ id: 'm' + Date.now() + Math.random().toString(36).slice(2,6), label, url, audioEl, volume: 70 });
+    renderMixTracks();
+  }
+
+  document.getElementById('musicAddBtn').addEventListener('click', () => {
+    const labelInput = document.getElementById('musicLabel');
+    const urlInput = document.getElementById('musicUrl');
+    const label = labelInput.value.trim() || 'Sans nom';
+    const url = urlInput.value.trim();
+    if(!url) return;
+
+    if(isDirectAudioUrl(url)){
+      addMixChannel(label, url);
+    } else {
+      extLinks.push({ id: 'e' + Date.now(), label, url });
+      renderExtTracks();
+    }
+    labelInput.value = '';
+    urlInput.value = '';
+  });
+
+  document.getElementById('musicImportBtn').addEventListener('click', () => {
+    document.getElementById('musicFile').click();
+  });
+  document.getElementById('musicFile').addEventListener('change', () => {
+    const file = document.getElementById('musicFile').files[0];
+    if(!file) return;
+    const labelInput = document.getElementById('musicLabel');
+    const label = labelInput.value.trim() || file.name.replace(/\.[^.]+$/, '');
+    const objectUrl = URL.createObjectURL(file);
+    addMixChannel(label, objectUrl);
+    labelInput.value = '';
+    document.getElementById('musicFile').value = '';
+  });
+}
+
+function renderMixTracks(){
+  const container = document.getElementById('mixTracks');
+  if(!container) return;
+  container.innerHTML = mixChannels.map(c => `
+    <div class="track-row ${!c.audioEl.paused ? 'playing' : ''}" data-id="${c.id}">
+      <button class="track-toggle" data-toggle="${c.id}">${!c.audioEl.paused ? '❚❚' : '▶'}</button>
+      <div class="track-name">${escapeHtml(c.label)}</div>
+      <div class="track-vol"><input type="range" min="0" max="100" value="${c.volume}" data-vol="${c.id}"></div>
+      <button class="track-remove" data-remove="${c.id}">✕</button>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('[data-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ch = mixChannels.find(c => c.id === btn.getAttribute('data-toggle'));
+      if(ch.audioEl.paused){ ch.audioEl.play().catch(() => {}); } else { ch.audioEl.pause(); }
+      renderMixTracks();
+    });
+  });
+  container.querySelectorAll('[data-vol]').forEach(slider => {
+    slider.addEventListener('input', () => {
+      const ch = mixChannels.find(c => c.id === slider.getAttribute('data-vol'));
+      ch.volume = Number(slider.value);
+      ch.audioEl.volume = ch.volume / 100;
+    });
+  });
+  container.querySelectorAll('[data-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-remove');
+      const ch = mixChannels.find(c => c.id === id);
+      if(ch){ ch.audioEl.pause(); }
+      mixChannels = mixChannels.filter(c => c.id !== id);
+      renderMixTracks();
+    });
+  });
+}
+
+function renderExtTracks(){
+  const container = document.getElementById('extTracks');
+  if(!container) return;
+  container.innerHTML = extLinks.map(l => `
+    <div class="ext-track-row">
+      <span>${escapeHtml(l.label)}</span>
+      <span>
+        <a class="btn" href="${l.url}" target="_blank" rel="noopener">Ouvrir ↗</a>
+        <button class="track-remove" data-extremove="${l.id}">✕</button>
+      </span>
+    </div>
+  `).join('');
+  container.querySelectorAll('[data-extremove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      extLinks = extLinks.filter(l => l.id !== btn.getAttribute('data-extremove'));
+      renderExtTracks();
+    });
+  });
+}
+
+async function renderGame(app, game){
+  app.innerHTML = `
+    <a href="#/" class="back-link">&larr; Retour au catalogue</a>
+    <div class="sheet">
+      <h2>${escapeHtml(game.title)}</h2>
+      <div class="tagline">${escapeHtml(game.tagline || '')}</div>
+      <p class="desc">${escapeHtml(game.description || '')}</p>
+      <dl class="meta-row">
+        <div class="meta-item"><dt>${escapeHtml(game.meta1Label || 'Genre')}</dt><dd>${escapeHtml(game.meta1 || '')}</dd></div>
+        <div class="meta-item"><dt>${escapeHtml(game.meta2Label || 'Système')}</dt><dd>${escapeHtml(game.meta2 || '')}</dd></div>
+      </dl>
+      ${game.link ? `<a class="ext-link" href="${game.link}" target="_blank" rel="noopener">Fiche officielle / GROG ↗</a>` : ''}
+    </div>
+
+    <div class="tools">
+      <h3>Outils de session</h3>
+      <div class="tools-note">Outils génériques (pas une simulation des règles précises de ce jeu) — à adapter à ta table.</div>
+
+      <div class="dice-row">
+        <select id="dieType"></select>
+        <span>×</span>
+        <input type="number" id="dieCount" min="1" max="10" value="1">
+        <button class="btn primary" id="rollBtn">Lancer</button>
+        <span class="dice-result" id="diceResult">—</span>
+        <span class="dice-detail" id="diceDetail"></span>
+      </div>
+
+      <div class="gen-row">
+        <button class="btn" id="genNpc">PNJ improvisé</button>
+        <button class="btn" id="genLoc">Lieu improvisé</button>
+      </div>
+      <div class="gen-out" id="genOut">Les résultats des générateurs s'affichent ici.</div>
+    </div>
+
+    <div class="tools">
+      <h3>Ambiance sonore <span style="font-size:0.7em; color:var(--parchment-dim);">(bêta)</span></h3>
+      <div class="tools-note">Colle un lien vers un fichier audio direct (.mp3/.ogg) pour le mixer en direct avec volume réglable, ou n'importe quel autre lien (YouTube, Spotify...) qui s'ouvrira simplement à côté, sans mixage.</div>
+
+      <div class="music-add">
+        <input type="text" id="musicLabel" placeholder="Nom (ex: Pluie, Taverne, Tension...)">
+        <input type="text" id="musicUrl" placeholder="Lien vers le son ou la piste">
+        <button class="btn primary" id="musicAddBtn">Ajouter le lien</button>
+        <button class="btn" id="musicImportBtn">Importer un fichier</button>
+        <input type="file" id="musicFile" accept="audio/*" style="display:none;">
+      </div>
+      <div class="tools-note" id="importNote" style="margin-top:-0.6rem; margin-bottom:1rem;">Un fichier importé reste local à ton navigateur pour cette session — pas sauvegardé, pas partagé.</div>
+
+      <div id="mixTracks"></div>
+      <div id="extTracks"></div>
+    </div>
+
+    <div class="comments">
+      <h3>Retours d'expérience</h3>
+      <div id="commentList">Chargement…</div>
+      <div id="commentAction"></div>
+    </div>
+  `;
+
+  initSessionTools(game);
+  initAmbianceMixer();
+
+  const actionZone = document.getElementById('commentAction');
+  if(!firebaseReady){
+    actionZone.innerHTML = '';
+  } else if(!currentUser){
+    actionZone.innerHTML = `<div class="comment-note">Connecte-toi pour laisser un retour d'expérience.</div>`;
+  } else if(currentRole === 'pending'){
+    actionZone.innerHTML = `<div class="comment-note">Ton compte est en attente de validation par un admin — tu pourras commenter une fois validé.</div>`;
+  } else {
+    actionZone.innerHTML = `
+      <div class="comment-form">
+        <textarea id="commentText" placeholder="Comment ça s'est passé à ta table ?"></textarea>
+        <button class="btn primary" id="postCommentBtn">Publier</button>
+      </div>
+    `;
+    document.getElementById('postCommentBtn').addEventListener('click', async () => {
+      const text = document.getElementById('commentText').value.trim();
+      if(!text) return;
+      await postComment(game.id, text);
+      await loadAndRenderComments(game.id);
+    });
+  }
+
+  if(firebaseReady){
+    await loadAndRenderComments(game.id);
+  } else {
+    document.getElementById('commentList').innerHTML = '<p style="color:var(--parchment-dim)">Commentaires indisponibles (Firebase non configuré).</p>';
+  }
+}
+
+async function loadAndRenderComments(gameId){
+  const list = document.getElementById('commentList');
+  try{
+    const comments = await loadComments(gameId);
+    list.innerHTML = comments.length ? comments.map(c => `
+      <div class="comment">
+        <div class="author">${escapeHtml(c.authorEmail || 'Anonyme')}<span class="date">${formatDate(c.createdAt)}</span></div>
+        <div>${escapeHtml(c.text)}</div>
+      </div>
+    `).join('') : '<p style="color:var(--parchment-dim)">Aucun retour pour l\'instant — sois le premier.</p>';
+  }catch(e){
+    list.innerHTML = '<p style="color:var(--parchment-dim)">Impossible de charger les commentaires pour le moment.</p>';
+  }
+}
+
+function renderAuthPanel(app){
+  app.innerHTML = `
+    <div class="auth-panel">
+      <h2>${authMode === 'login' ? 'Se connecter' : 'Créer un compte'}</h2>
+      <div class="auth-error" id="authError" style="display:none;"></div>
+      <input type="email" id="authEmail" placeholder="Adresse email">
+      <input type="password" id="authPassword" placeholder="Mot de passe">
+      <button class="btn primary" id="authSubmit" style="width:100%">${authMode === 'login' ? 'Se connecter' : "S'inscrire"}</button>
+      <div class="switch">
+        ${authMode === 'login'
+          ? `Pas encore de compte ? <a id="toSignup">Créer un compte</a>`
+          : `Déjà un compte ? <a id="toLogin">Se connecter</a>`}
+      </div>
+      ${authMode === 'signup' ? '<div class="comment-note" style="margin-top:1rem;">Ton compte sera créé "en attente" — il faudra qu\'un admin le valide avant que tu puisses commenter.</div>' : ''}
+    </div>
+  `;
+  const switchEl = document.getElementById(authMode === 'login' ? 'toSignup' : 'toLogin');
+  if(switchEl) switchEl.addEventListener('click', () => { authMode = authMode === 'login' ? 'signup' : 'login'; renderAuthPanel(app); });
+
+  document.getElementById('authSubmit').addEventListener('click', async () => {
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const errEl = document.getElementById('authError');
+    errEl.style.display = 'none';
+    try{
+      if(authMode === 'login'){ await handleLogin(email, password); }
+      else { await handleSignup(email, password); }
+      location.hash = '#/';
+    }catch(e){
+      errEl.textContent = translateAuthError(e.code);
+      errEl.style.display = 'block';
+    }
+  });
+}
+
+function translateAuthError(code){
+  const map = {
+    'auth/email-already-in-use': 'Cet email a déjà un compte.',
+    'auth/invalid-email': 'Adresse email invalide.',
+    'auth/weak-password': 'Mot de passe trop court (6 caractères minimum).',
+    'auth/user-not-found': 'Aucun compte avec cet email.',
+    'auth/wrong-password': 'Mot de passe incorrect.',
+    'auth/invalid-credential': 'Email ou mot de passe incorrect.'
+  };
+  return map[code] || 'Une erreur est survenue, réessaie.';
+}
+
+async function renderAdmin(app){
+  if(!currentUser || currentRole !== 'admin'){
+    app.innerHTML = `<div class="comment-note" style="margin-top:2rem;">Accès réservé aux admins.</div>`;
+    return;
+  }
+  app.innerHTML = `<h2 style="margin-top:2rem;">Comptes en attente de validation</h2><div class="admin-list" id="adminList">Chargement…</div>`;
+  await loadPendingUsers();
+  const list = document.getElementById('adminList');
+  list.innerHTML = pendingUsers.length ? pendingUsers.map(u => `
+    <div class="admin-row">
+      <span>${escapeHtml(u.email)}</span>
+      <div class="actions">
+        <button class="btn primary" data-approve="${u.id}">Valider</button>
+        <button class="btn danger" data-reject="${u.id}">Refuser</button>
+      </div>
+    </div>
+  `).join('') : '<p style="color:var(--parchment-dim)">Aucune demande en attente.</p>';
+
+  list.querySelectorAll('[data-approve]').forEach(btn => {
+    btn.addEventListener('click', () => approveUser(btn.getAttribute('data-approve')));
+  });
+  list.querySelectorAll('[data-reject]').forEach(btn => {
+    btn.addEventListener('click', () => rejectUser(btn.getAttribute('data-reject')));
+  });
+}
+
+window.addEventListener('hashchange', render);
+
+(async function init(){
+  await loadGames();
+  renderAuthZone();
+  render();
+})();
+</script>
+</body>
+</html>
