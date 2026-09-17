@@ -8,12 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-<!-- ============================================================
-  CONFIGURATION FIREBASE À REMPLACER
-  Colle ici l'objet firebaseConfig donné par la console Firebase
-  (Paramètres du projet → tes applis → config). Tant que ce n'est
-  pas fait, le site affichera un message d'avertissement.
-============================================================= -->
 <script>
   window.FIREBASE_CONFIG = {
     apiKey: "AIzaSyDLCljGgRJ7io5TAoWgtTfDTvmi5PPhsic",
@@ -31,100 +25,178 @@
 
 <style>
   :root{
-    --wood: #231911;
-    --wood-light: #2E2216;
-    --panel: #35281A;
-    --line: rgba(237,224,200,0.12);
-    --parchment: #EDE0C8;
-    --parchment-dim: #B3A48A;
-    --candle: #D9A441;
-    --candle-dim: #7A5B26;
-    --danger: #B24A3D;
+    --sky-top:#2E2A47; --sky-mid:#4A3B52; --sky-bottom:#6B4F52;
+    --gold:#E0B872; --parchment:#F3E9E4; --parchment-dim:#C9BEC2;
+    --wood-base:#5A3A24; --wood-dark:#3C2A1D;
+    --danger:#C4645A;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{
-    background: var(--wood); color: var(--parchment);
-    font-family:'Inter', sans-serif; line-height:1.55;
+    font-family:'Inter', sans-serif; color:var(--parchment); line-height:1.55;
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-bottom) 100%);
+    min-height:100vh; position:relative; overflow-x:hidden;
   }
-  h1,h2,h3,.display{ font-family:'Cormorant Garamond', serif; font-weight:600; }
+  h1,h2,h3{ font-family:'Cormorant Garamond', serif; font-weight:600; margin:0; }
   a{ color:inherit; }
   button, input, textarea{ font-family:'Inter', sans-serif; }
   button{ cursor:pointer; }
-  :focus-visible{ outline: 2px solid var(--candle); outline-offset:2px; }
+  :focus-visible{ outline: 2px solid var(--gold); outline-offset:2px; }
 
-  .topbar{
-    position:sticky; top:0; z-index:10;
-    display:flex; align-items:center; justify-content:space-between; gap:1rem;
-    padding:1rem 1.6rem; background:rgba(35,25,17,0.92); backdrop-filter:blur(6px);
-    border-bottom:1px solid var(--line); flex-wrap:wrap;
+  body::before{
+    content:""; position:fixed; inset:-10%; z-index:0; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity:0.12; mix-blend-mode:overlay;
   }
+  body::after{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    box-shadow: inset 0 0 18vw rgba(0,0,0,0.4);
+  }
+  .glow{
+    position:fixed; z-index:0; pointer-events:none; inset:0;
+    background:
+      radial-gradient(ellipse 50% 40% at 25% 15%, rgba(224,184,114,0.16), transparent 55%),
+      radial-gradient(ellipse 45% 55% at 80% 85%, rgba(201,124,109,0.22), transparent 60%);
+  }
+
+  /* ---------- bandeau bois ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:10; overflow:hidden;
+    background-color: var(--wood-base);
+    border-bottom: 3px solid var(--wood-dark);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.4);
+    padding: 1rem 1.6rem;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;
+  }
+  .topbar::before{
+    content:""; position:absolute; inset:0; z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='90'%3E%3Cfilter id='woodtop'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.25' numOctaves='4' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.35  0 0 0 0 0.22  0 0 0 0 0.11  0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23woodtop)'/%3E%3C/svg%3E");
+    background-size:260px 90px;
+    mix-blend-mode:overlay;
+  }
+  .topbar > *{ position:relative; z-index:1; }
   .brand{ font-size:1.3rem; text-decoration:none; }
-  .brand span{ color:var(--candle); }
-  .auth-zone{ display:flex; align-items:center; gap:0.8rem; font-size:0.85rem; flex-wrap:wrap; }
+  .brand span{ color: var(--gold); }
+  .nav-tabs{ display:flex; gap:1.4rem; }
+  .nav-tabs a{
+    text-decoration:none; font-size:0.95rem; padding-bottom:4px;
+    border-bottom:2px solid transparent; color: var(--parchment-dim);
+  }
+  .nav-tabs a.active{ border-color: var(--gold); color: var(--gold); }
+  .auth-zone{ display:flex; align-items:center; gap:0.7rem; font-size:0.85rem; flex-wrap:wrap; }
   .role-badge{
     font-size:0.72rem; padding:0.2rem 0.55rem; border-radius:10px;
-    background:var(--panel); border:1px solid var(--line); color:var(--parchment-dim);
+    background:rgba(0,0,0,0.25); border:1px solid rgba(224,184,114,0.25); color:var(--parchment-dim);
   }
-  .role-badge.admin{ color:var(--candle); border-color:var(--candle); }
+  .role-badge.admin{ color: var(--gold); border-color: var(--gold); }
   .btn{
-    background:var(--panel); border:1px solid var(--line); color:var(--parchment);
-    padding:0.5rem 0.9rem; border-radius:6px; font-size:0.85rem;
+    background:rgba(0,0,0,0.25); border:1px solid rgba(224,184,114,0.3); color:var(--parchment);
+    padding:0.45rem 0.85rem; border-radius:6px; font-size:0.82rem; text-decoration:none;
   }
-  .btn:hover{ border-color:var(--candle); }
-  .btn.primary{ background:var(--candle); color:#231910; border-color:var(--candle); font-weight:600; }
-  .btn.danger{ border-color:var(--danger); color:var(--danger); }
+  .btn:hover{ border-color: var(--gold); }
+  .btn.primary{ background: var(--gold); color:#2E2A47; border-color:var(--gold); font-weight:600; }
+  .btn.danger{ border-color: var(--danger); color: var(--danger); }
+  .io-btn{ background:none; border:none; color:var(--parchment-dim); font-size:0.78rem; text-decoration:underline; text-underline-offset:3px; }
+  .io-btn:hover{ color:var(--parchment); }
+  .draft-badge{
+    font-size:0.72rem; color: var(--gold); border:1px solid var(--gold); padding:0.2rem 0.55rem; border-radius:20px;
+  }
 
-  main{ max-width:1000px; margin:0 auto; padding:0 1.6rem 4rem; }
+  main{ position:relative; z-index:2; max-width:1000px; margin:0 auto; padding:0 1.6rem 5rem; }
 
   .config-warning{
-    background: rgba(178,74,61,0.15); border:1px solid var(--danger); color:#F0C9C2;
+    background: rgba(196,100,90,0.18); border:1px solid var(--danger); color:#F6D6D1;
     padding:1rem 1.2rem; border-radius:6px; margin:1.5rem 0; font-size:0.9rem;
   }
+  .hint{
+    font-size:0.82rem; color:var(--parchment-dim); background: rgba(224,184,114,0.08);
+    border:1px solid rgba(224,184,114,0.25); padding:0.7rem 1rem; border-radius:6px; margin:1.2rem 0;
+  }
 
-  .hero{ padding:3rem 0 2rem; }
-  .hero h1{ font-size:clamp(2rem,4.5vw,3rem); }
-  .hero p{ color:var(--parchment-dim); max-width:56ch; margin-top:0.6rem; }
+  .hero{ padding:3.2rem 0 2rem; }
+  .hero .eyebrow{ font-size:0.8rem; color:var(--gold); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem; }
+  .hero h1{ font-size:clamp(2rem,4.5vw,3rem); margin-bottom:0.7rem; }
+  .hero p{ max-width:56ch; color:var(--parchment-dim); }
 
-  .search-row{ display:flex; gap:0.8rem; margin:1.5rem 0 2rem; flex-wrap:wrap; }
+  [contenteditable="true"]{
+    outline:1px dashed rgba(224,184,114,0.4); border-radius:3px; padding:0.1rem 0.3rem;
+  }
+  [contenteditable="true"]:focus{ outline:1px solid var(--gold); background:rgba(224,184,114,0.06); }
+
+  .section-label{
+    font-size:0.8rem; color:var(--parchment-dim); text-transform:uppercase; letter-spacing:0.08em;
+    margin:2.2rem 0 0.9rem;
+  }
+
+  .search-row{ display:flex; gap:0.8rem; margin:1.2rem 0 1.8rem; flex-wrap:wrap; }
   .search-row input{
-    flex:1; min-width:220px; background:var(--panel); border:1px solid var(--line); color:var(--parchment);
+    flex:1; min-width:220px; background:rgba(0,0,0,0.25); border:1px solid rgba(224,184,114,0.25); color:var(--parchment);
     padding:0.6rem 1rem; border-radius:6px; font-size:0.9rem;
   }
 
-  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:1.2rem; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:1.2rem; }
+
   .card{
-    background:var(--panel); border:1px solid var(--line); border-radius:6px;
-    padding:1.1rem 1.2rem; text-decoration:none; color:var(--parchment); display:block;
+    position:relative; overflow:hidden; border-radius:8px; padding:1.1rem 1.2rem;
+    background: linear-gradient(160deg, rgba(90,58,38,0.55), rgba(60,38,26,0.7)), rgba(255,255,255,0.04);
+    border:1px solid rgba(224,184,114,0.3);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+    text-decoration:none; color:var(--parchment); display:block;
   }
-  .card:hover{ border-color:var(--candle); }
-  .card .eyebrow{ font-size:0.75rem; color:var(--candle); margin-bottom:0.3rem; }
+  .card::before{
+    content:""; position:absolute; inset:0; z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='wood2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.008 0.35' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.28  0 0 0 0 0.17  0 0 0 0 0.09  0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23wood2)'/%3E%3C/svg%3E");
+    background-size:320px 320px; mix-blend-mode:overlay; opacity:0.9;
+  }
+  .card > *{ position:relative; z-index:1; }
+  .card:hover{ border-color: var(--gold); }
+  .card .eyebrow{ font-size:0.75rem; color: var(--gold); margin-bottom:0.4rem; }
   .card h3{ font-size:1.2rem; margin-bottom:0.3rem; }
   .card .sys{ font-size:0.82rem; color:var(--parchment-dim); }
+  .card-del, .card-feat{
+    position:absolute; z-index:3; border:none; border-radius:50%;
+    width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:0.9rem;
+  }
+  .card-del{ top:0.6rem; right:0.6rem; background:rgba(20,17,15,0.75); color:var(--parchment); }
+  .card-del:hover{ background:#a63b3b; }
+  .card-feat{ top:0.6rem; left:0.6rem; background:rgba(20,17,15,0.75); color:var(--parchment-dim); }
+  .card-feat.on{ background: var(--gold); color:#2E2A47; }
+  .add-card{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem;
+    min-height:160px; background:transparent; border:1px dashed rgba(224,184,114,0.35); color:var(--parchment-dim);
+    border-radius:8px; font-size:0.92rem;
+  }
+  .add-card:hover{ color:var(--parchment); border-color:var(--gold); }
+  .add-card .plus{ font-size:1.7rem; font-family:'Cormorant Garamond',serif; color:var(--gold); }
 
   .back-link{ display:inline-block; margin:2rem 0 1rem; color:var(--parchment-dim); text-decoration:none; font-size:0.9rem; }
   .back-link:hover{ color:var(--parchment); }
 
   .sheet{
-    background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:1.8rem; margin-bottom:2rem;
+    background: rgba(0,0,0,0.2); border:1px solid rgba(224,184,114,0.25); border-radius:8px; padding:1.8rem; margin-bottom:2rem;
   }
   .sheet h2{ font-size:1.8rem; margin-bottom:0.3rem; }
   .sheet .tagline{ font-style:italic; color:var(--parchment-dim); margin-bottom:1rem; }
-  .sheet p.desc{ color:var(--parchment-dim); max-width:64ch; margin-bottom:1.2rem; }
+  .sheet p.desc{ color:var(--parchment-dim); max-width:64ch; margin-bottom:1.2rem; white-space:pre-wrap; }
   .meta-row{ display:flex; gap:1.6rem; flex-wrap:wrap; margin-bottom:1rem; }
-  .meta-item{ border-left:2px solid var(--candle); padding-left:0.6rem; }
+  .meta-item{ border-left:2px solid var(--gold); padding-left:0.6rem; }
   .meta-item dt{ font-size:0.72rem; color:var(--parchment-dim); }
   .meta-item dd{ font-size:0.9rem; }
-  .sheet .ext-link{ font-size:0.88rem; border-bottom:1px solid var(--candle); padding-bottom:2px; text-decoration:none; }
+  .sheet .ext-link{ font-size:0.88rem; border-bottom:1px solid var(--gold); padding-bottom:2px; text-decoration:none; }
+  .link-field{ margin-top:1rem; }
+  .link-field label{ font-size:0.75rem; color:var(--parchment-dim); display:block; margin-bottom:0.3rem; }
+  .link-field input{
+    background:rgba(0,0,0,0.25); border:1px solid rgba(224,184,114,0.25); color:var(--parchment);
+    padding:0.5rem 0.7rem; border-radius:6px; font-size:0.86rem; width:100%; max-width:380px;
+  }
 
-  .comments{ margin-top:2rem; }
   .tools{
-    background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:1.6rem; margin-bottom:2rem;
+    background: rgba(0,0,0,0.2); border:1px solid rgba(224,184,114,0.25); border-radius:8px; padding:1.6rem; margin-bottom:2rem;
   }
   .tools h3{ font-size:1.3rem; margin-bottom:0.4rem; }
   .tools .tools-note{ font-size:0.8rem; color:var(--parchment-dim); margin-bottom:1.2rem; }
   .dice-row{ display:flex; align-items:center; gap:0.7rem; flex-wrap:wrap; margin-bottom:1.2rem; }
   .dice-row select, .dice-row input[type=number]{
-    background:var(--wood-light); border:1px solid var(--line); color:var(--parchment);
+    background:rgba(0,0,0,0.3); border:1px solid rgba(224,184,114,0.25); color:var(--parchment);
     padding:0.5rem 0.7rem; border-radius:6px; font-size:0.88rem;
   }
   .dice-row input[type=number]{ width:60px; }
@@ -132,77 +204,84 @@
   .dice-detail{ font-size:0.78rem; color:var(--parchment-dim); }
   .gen-row{ display:flex; gap:0.7rem; margin-bottom:0.8rem; flex-wrap:wrap; }
   .gen-out{
-    background:var(--wood-light); border:1px dashed var(--line); border-radius:6px;
+    background:rgba(0,0,0,0.25); border:1px dashed rgba(224,184,114,0.25); border-radius:6px;
     padding:0.8rem 1rem; font-size:0.86rem; color:var(--parchment-dim); min-height:2.2em;
   }
   .music-add{ display:flex; gap:0.6rem; margin-bottom:1rem; flex-wrap:wrap; }
   .music-add input{
-    flex:1; min-width:180px; background:var(--wood-light); border:1px solid var(--line); color:var(--parchment);
+    flex:1; min-width:180px; background:rgba(0,0,0,0.3); border:1px solid rgba(224,184,114,0.25); color:var(--parchment);
     padding:0.5rem 0.8rem; border-radius:6px; font-size:0.86rem;
   }
   .track-row{
-    display:flex; align-items:center; gap:0.8rem; background:var(--wood-light); border:1px solid var(--line);
+    display:flex; align-items:center; gap:0.8rem; background:rgba(0,0,0,0.25); border:1px solid rgba(224,184,114,0.2);
     border-radius:6px; padding:0.6rem 0.8rem; margin-bottom:0.5rem;
   }
-  .track-row.playing{ border-color:var(--candle); }
+  .track-row.playing{ border-color: var(--gold); }
   .track-toggle{
-    width:30px; height:30px; border-radius:50%; border:1px solid var(--line); background:var(--panel);
+    width:30px; height:30px; border-radius:50%; border:1px solid rgba(224,184,114,0.3); background:rgba(0,0,0,0.3);
     color:var(--parchment-dim); font-size:0.8rem; flex-shrink:0;
   }
-  .track-row.playing .track-toggle{ background:var(--candle); color:#231910; border-color:var(--candle); }
+  .track-row.playing .track-toggle{ background: var(--gold); color:#2E2A47; border-color:var(--gold); }
   .track-name{ flex:1; font-size:0.85rem; }
   .track-vol{ width:100px; }
-  .track-vol input{ width:100%; accent-color:var(--candle); }
+  .track-vol input{ width:100%; accent-color:var(--gold); }
   .track-remove{ background:none; border:none; color:var(--parchment-dim); font-size:0.9rem; }
   .track-remove:hover{ color:var(--danger); }
   .ext-track-row{
     display:flex; align-items:center; justify-content:space-between; gap:0.8rem;
-    background:var(--wood-light); border:1px dashed var(--line); border-radius:6px;
+    background:rgba(0,0,0,0.25); border:1px dashed rgba(224,184,114,0.2); border-radius:6px;
     padding:0.6rem 0.8rem; margin-bottom:0.5rem; font-size:0.85rem;
   }
+
+  .comments{ margin-top:2rem; }
   .comments h3{ font-size:1.3rem; margin-bottom:1rem; }
-  .comment{
-    border-top:1px solid var(--line); padding:0.9rem 0; font-size:0.88rem;
-  }
-  .comment .author{ color:var(--candle); font-size:0.8rem; margin-bottom:0.2rem; }
+  .comment{ border-top:1px solid rgba(224,184,114,0.15); padding:0.9rem 0; font-size:0.88rem; }
+  .comment .author{ color: var(--gold); font-size:0.8rem; margin-bottom:0.2rem; }
   .comment .date{ color:var(--parchment-dim); font-size:0.72rem; margin-left:0.5rem; }
   .comment-form textarea{
-    width:100%; background:var(--wood-light); border:1px solid var(--line); color:var(--parchment);
+    width:100%; background:rgba(0,0,0,0.25); border:1px solid rgba(224,184,114,0.25); color:var(--parchment);
     border-radius:6px; padding:0.7rem 0.9rem; font-size:0.88rem; min-height:80px; resize:vertical; margin-bottom:0.6rem;
   }
   .comment-note{
-    font-size:0.85rem; color:var(--parchment-dim); border:1px dashed var(--line);
+    font-size:0.85rem; color:var(--parchment-dim); border:1px dashed rgba(224,184,114,0.25);
     padding:0.8rem 1rem; border-radius:6px; margin-top:1rem;
   }
 
   .auth-panel{
-    background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:1.6rem;
+    background: rgba(0,0,0,0.25); border:1px solid rgba(224,184,114,0.25); border-radius:8px; padding:1.6rem;
     max-width:380px; margin:2rem auto;
   }
   .auth-panel h2{ font-size:1.4rem; margin-bottom:1rem; }
   .auth-panel input{
-    width:100%; background:var(--wood-light); border:1px solid var(--line); color:var(--parchment);
+    width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(224,184,114,0.25); color:var(--parchment);
     padding:0.6rem 0.8rem; border-radius:6px; font-size:0.9rem; margin-bottom:0.7rem;
   }
   .auth-panel .switch{ font-size:0.82rem; color:var(--parchment-dim); margin-top:0.8rem; text-align:center; }
-  .auth-panel .switch a{ color:var(--candle); cursor:pointer; text-decoration:underline; }
+  .auth-panel .switch a{ color: var(--gold); cursor:pointer; text-decoration:underline; }
   .auth-error{ color:#F0A18C; font-size:0.82rem; margin-bottom:0.6rem; }
 
   .admin-list{ margin-top:1.5rem; }
   .admin-row{
     display:flex; align-items:center; justify-content:space-between; gap:1rem;
-    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    background: rgba(0,0,0,0.25); border:1px solid rgba(224,184,114,0.2); border-radius:6px;
     padding:0.8rem 1rem; margin-bottom:0.6rem; font-size:0.88rem;
   }
   .admin-row .actions{ display:flex; gap:0.5rem; }
 
-  footer{ text-align:center; padding:2.5rem 0; color:var(--parchment-dim); font-size:0.8rem; border-top:1px solid var(--line); }
+  footer{ position:relative; z-index:2; text-align:center; padding:2.5rem 1.6rem; color:var(--parchment-dim); font-size:0.82rem; }
+  input[type=file]{ display:none; }
 </style>
 </head>
 <body>
 
+<div class="glow"></div>
+
 <div class="topbar">
   <a href="#/" class="brand">La <span>Taverne</span> de Goulven</a>
+  <div class="nav-tabs" id="navTabs">
+    <a href="#/">Accueil</a>
+    <a href="#/jdr">JDR</a>
+  </div>
   <div class="auth-zone" id="authZone"></div>
 </div>
 
@@ -228,17 +307,66 @@ try{
 /* ============================================================
    ÉTAT GLOBAL
 ============================================================= */
+const STORAGE_KEY = 'taverne-content-draft-v1';
+let siteConfig = { introTitle: '', introText: '', featuredIds: [] };
 let games = [];
-let currentUser = null;   // { uid, email }
-let currentRole = null;   // 'pending' | 'validated' | 'admin' | null
-let authMode = 'login';   // 'login' | 'signup'
+let publishedData = null;
+let usingDraft = false;
+let contentEditMode = false;
+
+let currentUser = null;
+let currentRole = null;
+let authMode = 'login';
 let pendingUsers = [];
 
-async function loadGames(){
+/* ============================================================
+   CHARGEMENT / BROUILLON / PUBLICATION DU CONTENU
+============================================================= */
+async function fetchPublished(){
   try{
     const res = await fetch('./data.json', { cache: 'no-store' });
-    if(res.ok){ games = await res.json(); }
-  }catch(e){ games = []; }
+    if(!res.ok) return null;
+    const json = await res.json();
+    if(json && Array.isArray(json.games) && json.siteConfig) return json;
+    return null;
+  }catch(e){ return null; }
+}
+function loadDraft(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+function saveDraft(){
+  usingDraft = true;
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ siteConfig, games }));
+  }catch(e){
+    alert("Sauvegarde locale impossible (stockage plein).");
+  }
+}
+function discardDraft(){
+  if(!confirm("Abandonner tes modifications non publiées et revenir à la version en ligne ?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  usingDraft = false;
+  applyData(publishedData || { siteConfig, games: [] });
+  render();
+}
+function applyData(d){
+  siteConfig = d.siteConfig || { introTitle:'', introText:'', featuredIds:[] };
+  games = d.games || [];
+}
+
+async function initContent(){
+  publishedData = await fetchPublished();
+  const draft = loadDraft();
+  if(draft){
+    applyData(draft);
+    usingDraft = true;
+  } else if(publishedData){
+    applyData(publishedData);
+  }
 }
 
 /* ============================================================
@@ -253,12 +381,12 @@ if(firebaseReady){
     } else {
       currentUser = null;
       currentRole = null;
+      contentEditMode = false;
     }
     renderAuthZone();
     render();
   });
 }
-
 async function ensureUserDoc(user){
   const ref = db.collection('users').doc(user.uid);
   const snap = await ref.get();
@@ -270,16 +398,9 @@ async function refreshRole(){
   const snap = await db.collection('users').doc(currentUser.uid).get();
   currentRole = snap.exists ? snap.data().role : 'pending';
 }
-
-async function handleSignup(email, password){
-  return auth.createUserWithEmailAndPassword(email, password);
-}
-async function handleLogin(email, password){
-  return auth.signInWithEmailAndPassword(email, password);
-}
-function handleLogout(){
-  auth.signOut();
-}
+async function handleSignup(email, password){ return auth.createUserWithEmailAndPassword(email, password); }
+async function handleLogin(email, password){ return auth.signInWithEmailAndPassword(email, password); }
+function handleLogout(){ auth.signOut(); }
 
 /* ============================================================
    ADMIN : validation des comptes
@@ -301,6 +422,56 @@ async function rejectUser(uid){
 }
 
 /* ============================================================
+   ÉDITION DE CONTENU (admin uniquement)
+============================================================= */
+function updateSiteConfigField(field, value){
+  siteConfig[field] = value;
+  saveDraft();
+}
+function toggleFeatured(id){
+  const set = new Set(siteConfig.featuredIds || []);
+  if(set.has(id)) set.delete(id); else set.add(id);
+  siteConfig.featuredIds = [...set];
+  saveDraft();
+  render();
+}
+function uniqueId(base){
+  let id = base, n = 1;
+  while(games.some(g => g.id === id)){ id = base + '-' + (++n); }
+  return id;
+}
+function addGame(){
+  const g = {
+    id: uniqueId('nouveau-jeu'),
+    title: 'Nouveau JDR',
+    tagline: 'Une accroche pour donner le ton.',
+    description: "Décris ici l'ambiance, le pitch et ce qui rend ce jeu reconnaissable.",
+    meta1Label: 'Genre', meta1: 'À préciser',
+    meta2Label: 'Système de jeu', meta2: 'À préciser',
+    link: '', image: null
+  };
+  games.push(g);
+  saveDraft();
+  location.hash = '#/jdr/g/' + g.id;
+}
+function deleteGame(id){
+  const g = games.find(x => x.id === id);
+  if(!g) return;
+  if(!confirm('Retirer "' + g.title + '" du catalogue ?')) return;
+  games = games.filter(x => x.id !== id);
+  siteConfig.featuredIds = (siteConfig.featuredIds || []).filter(fid => fid !== id);
+  saveDraft();
+  location.hash = '#/jdr';
+  render();
+}
+function updateGameField(id, field, value){
+  const g = games.find(x => x.id === id);
+  if(!g) return;
+  g[field] = value;
+  saveDraft();
+}
+
+/* ============================================================
    COMMENTAIRES
 ============================================================= */
 async function loadComments(gameId){
@@ -312,108 +483,15 @@ async function loadComments(gameId){
 }
 async function postComment(gameId, text){
   await db.collection('comments').add({
-    gameId,
-    uid: currentUser.uid,
-    authorEmail: currentUser.email,
-    text,
+    gameId, uid: currentUser.uid, authorEmail: currentUser.email, text,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 }
 
 /* ============================================================
-   RENDU
-============================================================= */
-function renderAuthZone(){
-  const zone = document.getElementById('authZone');
-  if(!firebaseReady){
-    zone.innerHTML = '';
-    return;
-  }
-  if(currentUser){
-    const roleLabel = currentRole === 'admin' ? 'admin' : currentRole === 'validated' ? 'membre' : 'en attente';
-    zone.innerHTML = `
-      <span>${escapeHtml(currentUser.email)}</span>
-      <span class="role-badge ${currentRole === 'admin' ? 'admin' : ''}">${roleLabel}</span>
-      ${currentRole === 'admin' ? '<a href="#/admin" class="btn">Administration</a>' : ''}
-      <button class="btn" id="logoutBtn">Se déconnecter</button>
-    `;
-    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-  } else {
-    zone.innerHTML = `<a href="#/compte" class="btn primary">Se connecter</a>`;
-  }
-}
-
-function escapeHtml(str){
-  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function formatDate(ts){
-  if(!ts || !ts.toDate) return '';
-  return ts.toDate().toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
-}
-
-async function render(){
-  const app = document.getElementById('app');
-  const hash = location.hash || '#/';
-
-  if(!firebaseReady){
-    app.innerHTML = `<div class="config-warning">
-      ⚠️ La configuration Firebase n'est pas encore renseignée dans le code (bloc <code>FIREBASE_CONFIG</code> en haut du fichier).
-      Les comptes, la validation admin et les commentaires ne fonctionneront pas tant que ce n'est pas fait — mais le catalogue reste consultable ci-dessous.
-    </div>`;
-  } else {
-    app.innerHTML = '';
-  }
-
-  if(hash === '#/compte'){
-    renderAuthPanel(app);
-  } else if(hash === '#/admin'){
-    await renderAdmin(app);
-  } else if(hash.startsWith('#/g/')){
-    const id = decodeURIComponent(hash.slice(4));
-    const game = games.find(g => g.id === id);
-    if(!game){ location.hash = '#/'; return; }
-    await renderGame(app, game);
-  } else {
-    renderHome(app);
-  }
-}
-
-function renderHome(app){
-  const wrap = document.createElement('div');
-  wrap.innerHTML = `
-    <section class="hero">
-      <h1>La Taverne de Goulven</h1>
-      <p>Un catalogue de jeux de rôle, et un coin pour poser ses retours d'expérience — pas besoin de compte pour lire, juste pour parler.</p>
-    </section>
-    <div class="search-row">
-      <input type="text" id="searchInput" placeholder="Chercher un jeu, un genre, un système…">
-    </div>
-    <div class="grid" id="gameGrid"></div>
-  `;
-  app.appendChild(wrap);
-
-  function renderGrid(filter){
-    const f = (filter || '').toLowerCase();
-    const filtered = games.filter(g =>
-      !f || g.title.toLowerCase().includes(f) || (g.meta1||'').toLowerCase().includes(f) || (g.meta2||'').toLowerCase().includes(f)
-    );
-    document.getElementById('gameGrid').innerHTML = filtered.map(g => `
-      <a class="card" href="#/g/${encodeURIComponent(g.id)}">
-        <div class="eyebrow">${escapeHtml(g.meta1 || '')}</div>
-        <h3>${escapeHtml(g.title)}</h3>
-        <div class="sys">${escapeHtml(g.meta2 || '')}</div>
-      </a>
-    `).join('') || '<p style="color:var(--parchment-dim)">Aucun jeu ne correspond à cette recherche.</p>';
-  }
-  renderGrid('');
-  document.getElementById('searchInput').addEventListener('input', e => renderGrid(e.target.value));
-}
-
-/* ============================================================
-   OUTILS DE SESSION (génériques, non spécifiques à un jeu précis)
+   OUTILS DE SESSION
 ============================================================= */
 const DIE_SIZES = [4, 6, 8, 10, 12, 20, 100];
-
 function guessDefaultDie(meta2){
   const s = (meta2 || '').toLowerCase();
   for(const size of [100, 20, 12, 10, 8, 6, 4]){
@@ -421,11 +499,9 @@ function guessDefaultDie(meta2){
   }
   return 6;
 }
-
 function initSessionTools(game){
   const dieSelect = document.getElementById('dieType');
   if(!dieSelect) return;
-
   const guessed = guessDefaultDie(game.meta2);
   dieSelect.innerHTML = DIE_SIZES.map(size => `<option value="${size}" ${size === guessed ? 'selected' : ''}>D${size}</option>`).join('');
 
@@ -441,33 +517,24 @@ function initSessionTools(game){
   const npcTraits = ['méfiant·e', 'bavard·e', 'blessé·e', 'trop confiant·e', 'silencieux·se', 'pressé·e', 'observateur·rice', 'nerveux·se'];
   const npcRoles = ['un·e marchand·e', 'un·e garde', 'un·e voyageur·se', 'un·e messager·ère', 'un·e artisan·e', 'un·e ancien·ne du coin', 'un·e étranger·ère de passage'];
   const npcHooks = ["cherche quelque chose qu'il/elle a perdu", "connaît un secret qu'il/elle ne dira pas tout de suite", "doit de l'argent à quelqu'un", "a besoin d'aide mais n'ose pas le demander", "ment sur un détail précis"];
-
   const locTypes = ["une auberge à moitié vide", "un carrefour animé", "un bâtiment à l'abandon", "un marché improvisé", "un point de passage surveillé", "un lieu de repos oublié de tous"];
   const locDetails = ["une odeur particulière flotte dans l'air", "quelqu'un observe depuis un coin", "un objet ne devrait pas être là", "le silence y est plus lourd que prévu", "une trace récente indique un passage"];
-
   function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 
   document.getElementById('genNpc').addEventListener('click', () => {
-    document.getElementById('genOut').textContent =
-      `${pick(npcRoles)}, ${pick(npcTraits)} — ${pick(npcHooks)}.`;
+    document.getElementById('genOut').textContent = `${pick(npcRoles)}, ${pick(npcTraits)} — ${pick(npcHooks)}.`;
   });
   document.getElementById('genLoc').addEventListener('click', () => {
-    document.getElementById('genOut').textContent =
-      `${pick(locTypes)} : ${pick(locDetails)}.`;
+    document.getElementById('genOut').textContent = `${pick(locTypes)} : ${pick(locDetails)}.`;
   });
 }
 
 /* ============================================================
-   AMBIANCE SONORE (bêta) — fichiers audio directs mixables,
-   autres liens (YouTube, Spotify...) en simple ouverture externe.
-   État éphémère : pas de sauvegarde, remis à zéro au rechargement.
+   AMBIANCE SONORE (bêta) — état éphémère
 ============================================================= */
-let mixChannels = []; // { id, label, url, audioEl, volume }
-let extLinks = [];    // { id, label, url }
-
-function isDirectAudioUrl(url){
-  return /\.(mp3|ogg|wav|m4a)(\?.*)?$/i.test(url.trim());
-}
+let mixChannels = [];
+let extLinks = [];
+function isDirectAudioUrl(url){ return /\.(mp3|ogg|wav|m4a)(\?.*)?$/i.test(url.trim()); }
 
 function initAmbianceMixer(){
   mixChannels.forEach(c => { c.audioEl.pause(); });
@@ -490,7 +557,6 @@ function initAmbianceMixer(){
     const label = labelInput.value.trim() || 'Sans nom';
     const url = urlInput.value.trim();
     if(!url) return;
-
     if(isDirectAudioUrl(url)){
       addMixChannel(label, url);
     } else {
@@ -515,7 +581,6 @@ function initAmbianceMixer(){
     document.getElementById('musicFile').value = '';
   });
 }
-
 function renderMixTracks(){
   const container = document.getElementById('mixTracks');
   if(!container) return;
@@ -527,7 +592,6 @@ function renderMixTracks(){
       <button class="track-remove" data-remove="${c.id}">✕</button>
     </div>
   `).join('');
-
   container.querySelectorAll('[data-toggle]').forEach(btn => {
     btn.addEventListener('click', () => {
       const ch = mixChannels.find(c => c.id === btn.getAttribute('data-toggle'));
@@ -552,7 +616,6 @@ function renderMixTracks(){
     });
   });
 }
-
 function renderExtTracks(){
   const container = document.getElementById('extTracks');
   if(!container) return;
@@ -573,24 +636,238 @@ function renderExtTracks(){
   });
 }
 
+/* ============================================================
+   RENDU
+============================================================= */
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(str){ return escapeHtml(str); }
+function formatDate(ts){
+  if(!ts || !ts.toDate) return '';
+  return ts.toDate().toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function renderAuthZone(){
+  const zone = document.getElementById('authZone');
+  if(!firebaseReady){ zone.innerHTML = ''; return; }
+  if(currentUser){
+    const roleLabel = currentRole === 'admin' ? 'admin' : currentRole === 'validated' ? 'membre' : 'en attente';
+    zone.innerHTML = `
+      <span>${escapeHtml(currentUser.email)}</span>
+      <span class="role-badge ${currentRole === 'admin' ? 'admin' : ''}">${roleLabel}</span>
+      ${currentRole === 'admin' ? `
+        <button class="btn ${contentEditMode ? 'primary' : ''}" id="editModeBtn">${contentEditMode ? 'Terminer l’édition' : 'Éditer le contenu'}</button>
+        <a href="#/admin" class="btn">Comptes</a>
+      ` : ''}
+      <button class="btn" id="logoutBtn">Se déconnecter</button>
+    `;
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    const editBtn = document.getElementById('editModeBtn');
+    if(editBtn) editBtn.addEventListener('click', () => { contentEditMode = !contentEditMode; renderAuthZone(); render(); });
+  } else {
+    zone.innerHTML = `<a href="#/compte" class="btn primary">Se connecter</a>`;
+  }
+}
+
+function renderNavTabs(hash){
+  document.querySelectorAll('#navTabs a').forEach(a => a.classList.remove('active'));
+  const home = document.querySelector('#navTabs a[href="#/"]');
+  const jdr = document.querySelector('#navTabs a[href="#/jdr"]');
+  if(hash === '#/' || hash === '') home.classList.add('active');
+  else if(hash.startsWith('#/jdr')) jdr.classList.add('active');
+}
+
+async function render(){
+  const app = document.getElementById('app');
+  const hash = location.hash || '#/';
+  renderNavTabs(hash);
+
+  if(!firebaseReady){
+    app.innerHTML = `<div class="config-warning">La configuration Firebase est manquante — comptes et commentaires indisponibles.</div>`;
+  } else {
+    app.innerHTML = '';
+  }
+
+  if(hash === '#/compte'){
+    renderAuthPanel(app);
+  } else if(hash === '#/admin'){
+    await renderAdmin(app);
+  } else if(hash.startsWith('#/jdr/g/')){
+    const id = decodeURIComponent(hash.slice(8));
+    const game = games.find(g => g.id === id);
+    if(!game){ location.hash = '#/jdr'; return; }
+    await renderGame(app, game);
+  } else if(hash === '#/jdr'){
+    renderCatalogue(app);
+  } else {
+    renderHome(app);
+  }
+
+  renderDraftControls();
+}
+
+function renderDraftControls(){
+  let bar = document.getElementById('draftBar');
+  if(contentEditMode){
+    if(!bar){
+      bar = document.createElement('div');
+      bar.id = 'draftBar';
+      bar.style.cssText = 'position:fixed; bottom:0; left:0; right:0; z-index:20; background:rgba(20,15,10,0.92); border-top:1px solid rgba(224,184,114,0.3); padding:0.7rem 1.2rem; display:flex; gap:0.8rem; align-items:center; justify-content:center; flex-wrap:wrap;';
+      document.body.appendChild(bar);
+    }
+    bar.innerHTML = `
+      ${usingDraft ? '<span class="draft-badge">Brouillon non publié</span>' : ''}
+      <button class="io-btn" id="exportBtn">Exporter data.json</button>
+      <button class="io-btn" id="importBtn">Importer</button>
+      <input type="file" id="importFile" accept="application/json">
+      ${usingDraft ? '<button class="io-btn" id="discardBtn">Revenir à la version publiée</button>' : ''}
+    `;
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify({ siteConfig, games }, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'data.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+    document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+    document.getElementById('importFile').addEventListener('change', () => {
+      const file = document.getElementById('importFile').files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try{
+          const imported = JSON.parse(e.target.result);
+          if(!Array.isArray(imported.games) || !imported.siteConfig) throw new Error('format invalide');
+          applyData(imported);
+          saveDraft();
+          render();
+          alert('Import réussi.');
+        }catch(err){
+          alert("Fichier invalide — vérifie que c'est bien un export de ce site.");
+        }
+      };
+      reader.readAsText(file);
+    });
+    const discardBtn = document.getElementById('discardBtn');
+    if(discardBtn) discardBtn.addEventListener('click', discardDraft);
+  } else if(bar){
+    bar.remove();
+  }
+}
+
+function renderHome(app){
+  const featuredIds = siteConfig.featuredIds || [];
+  const featuredGames = featuredIds.map(id => games.find(g => g.id === id)).filter(Boolean);
+
+  app.innerHTML = `
+    <section class="hero">
+      <div class="eyebrow">Bienvenue</div>
+      <h1 id="introTitle" ${contentEditMode ? 'contenteditable="true"' : ''}>${escapeHtml(siteConfig.introTitle)}</h1>
+      <p id="introText" ${contentEditMode ? 'contenteditable="true"' : ''}>${escapeHtml(siteConfig.introText)}</p>
+    </section>
+
+    ${contentEditMode ? '<div class="hint">Mode édition actif — modifie les textes directement, coche les jeux à mettre en avant sur la page JDR. Pense à exporter puis publier data.json pour que tout le monde voie les changements.</div>' : ''}
+
+    <div class="section-label">Jeux mis en avant</div>
+    <div class="grid" id="featuredGrid"></div>
+  `;
+
+  const titleEl = document.getElementById('introTitle');
+  const textEl = document.getElementById('introText');
+  if(contentEditMode){
+    titleEl.addEventListener('blur', () => updateSiteConfigField('introTitle', titleEl.textContent.trim()));
+    textEl.addEventListener('blur', () => updateSiteConfigField('introText', textEl.textContent.trim()));
+  }
+
+  const grid = document.getElementById('featuredGrid');
+  grid.innerHTML = featuredGames.map(g => `
+    <a class="card" href="#/jdr/g/${encodeURIComponent(g.id)}">
+      <div class="eyebrow">${escapeHtml(g.meta1 || '')}</div>
+      <h3>${escapeHtml(g.title)}</h3>
+      <div class="sys">${escapeHtml(g.meta2 || '')}</div>
+    </a>
+  `).join('') || '<p style="color:var(--parchment-dim)">Aucun jeu mis en avant pour l\'instant.</p>';
+}
+
+function renderCatalogue(app){
+  app.innerHTML = `
+    <section class="hero">
+      <h1>Le catalogue</h1>
+      <p>Tous les jeux référencés sur la Taverne.</p>
+    </section>
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Chercher un jeu, un genre, un système…">
+    </div>
+    ${contentEditMode ? '<div class="hint">Mode édition actif — coche l’étoile pour mettre un jeu en avant sur l’accueil, ou retire-le du catalogue.</div>' : ''}
+    <div class="grid" id="gameGrid"></div>
+  `;
+
+  function renderGrid(filter){
+    const f = (filter || '').toLowerCase();
+    const filtered = games.filter(g =>
+      !f || g.title.toLowerCase().includes(f) || (g.meta1||'').toLowerCase().includes(f) || (g.meta2||'').toLowerCase().includes(f)
+    );
+    const featuredIds = new Set(siteConfig.featuredIds || []);
+    let cards = filtered.map(g => `
+      <a class="card" href="#/jdr/g/${encodeURIComponent(g.id)}">
+        ${contentEditMode ? `
+          <button class="card-feat ${featuredIds.has(g.id) ? 'on' : ''}" data-feat="${g.id}" title="Mettre en avant">★</button>
+          <button class="card-del" data-del="${g.id}" title="Retirer">&times;</button>
+        ` : ''}
+        <div class="eyebrow">${escapeHtml(g.meta1 || '')}</div>
+        <h3>${escapeHtml(g.title)}</h3>
+        <div class="sys">${escapeHtml(g.meta2 || '')}</div>
+      </a>
+    `).join('');
+    if(contentEditMode){
+      cards += `<button class="card add-card" id="addGameBtn"><span class="plus">+</span>Ajouter un jeu</button>`;
+    }
+    document.getElementById('gameGrid').innerHTML = cards || '<p style="color:var(--parchment-dim)">Aucun jeu ne correspond à cette recherche.</p>';
+
+    if(contentEditMode){
+      const addBtn = document.getElementById('addGameBtn');
+      if(addBtn) addBtn.addEventListener('click', addGame);
+      document.querySelectorAll('[data-feat]').forEach(btn => {
+        btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); toggleFeatured(btn.getAttribute('data-feat')); });
+      });
+      document.querySelectorAll('[data-del]').forEach(btn => {
+        btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); deleteGame(btn.getAttribute('data-del')); });
+      });
+    }
+  }
+  renderGrid('');
+  document.getElementById('searchInput').addEventListener('input', e => renderGrid(e.target.value));
+}
+
 async function renderGame(app, game){
   app.innerHTML = `
-    <a href="#/" class="back-link">&larr; Retour au catalogue</a>
+    <a href="#/jdr" class="back-link">&larr; Retour au catalogue</a>
     <div class="sheet">
-      <h2>${escapeHtml(game.title)}</h2>
-      <div class="tagline">${escapeHtml(game.tagline || '')}</div>
-      <p class="desc">${escapeHtml(game.description || '')}</p>
+      <h2 id="f-title" ${contentEditMode ? 'contenteditable="true"' : ''}>${escapeHtml(game.title)}</h2>
+      <div class="tagline" id="f-tagline" ${contentEditMode ? 'contenteditable="true"' : ''}>${escapeHtml(game.tagline || '')}</div>
+      <p class="desc" id="f-description" ${contentEditMode ? 'contenteditable="true"' : ''}>${escapeHtml(game.description || '')}</p>
       <dl class="meta-row">
-        <div class="meta-item"><dt>${escapeHtml(game.meta1Label || 'Genre')}</dt><dd>${escapeHtml(game.meta1 || '')}</dd></div>
-        <div class="meta-item"><dt>${escapeHtml(game.meta2Label || 'Système')}</dt><dd>${escapeHtml(game.meta2 || '')}</dd></div>
+        <div class="meta-item">
+          <dt id="f-meta1Label" ${contentEditMode ? 'contenteditable="true"' : ''}>${escapeHtml(game.meta1Label || 'Genre')}</dt>
+          <dd id="f-meta1" ${contentEditMode ? 'contenteditable="true"' : ''}>${escapeHtml(game.meta1 || '')}</dd>
+        </div>
+        <div class="meta-item">
+          <dt id="f-meta2Label" ${contentEditMode ? 'contenteditable="true"' : ''}>${escapeHtml(game.meta2Label || 'Système')}</dt>
+          <dd id="f-meta2" ${contentEditMode ? 'contenteditable="true"' : ''}>${escapeHtml(game.meta2 || '')}</dd>
+        </div>
       </dl>
-      ${game.link ? `<a class="ext-link" href="${game.link}" target="_blank" rel="noopener">Fiche officielle / GROG ↗</a>` : ''}
+      ${contentEditMode ? `
+        <div class="link-field">
+          <label for="f-link">Lien externe (GROG, éditeur...)</label>
+          <input type="text" id="f-link" value="${escapeAttr(game.link || '')}">
+        </div>
+      ` : (game.link ? `<a class="ext-link" href="${escapeAttr(game.link)}" target="_blank" rel="noopener">Fiche officielle / GROG ↗</a>` : '')}
     </div>
 
     <div class="tools">
       <h3>Outils de session</h3>
       <div class="tools-note">Outils génériques (pas une simulation des règles précises de ce jeu) — à adapter à ta table.</div>
-
       <div class="dice-row">
         <select id="dieType"></select>
         <span>×</span>
@@ -599,7 +876,6 @@ async function renderGame(app, game){
         <span class="dice-result" id="diceResult">—</span>
         <span class="dice-detail" id="diceDetail"></span>
       </div>
-
       <div class="gen-row">
         <button class="btn" id="genNpc">PNJ improvisé</button>
         <button class="btn" id="genLoc">Lieu improvisé</button>
@@ -610,16 +886,14 @@ async function renderGame(app, game){
     <div class="tools">
       <h3>Ambiance sonore <span style="font-size:0.7em; color:var(--parchment-dim);">(bêta)</span></h3>
       <div class="tools-note">Colle un lien vers un fichier audio direct (.mp3/.ogg) pour le mixer en direct avec volume réglable, ou n'importe quel autre lien (YouTube, Spotify...) qui s'ouvrira simplement à côté, sans mixage.</div>
-
       <div class="music-add">
         <input type="text" id="musicLabel" placeholder="Nom (ex: Pluie, Taverne, Tension...)">
         <input type="text" id="musicUrl" placeholder="Lien vers le son ou la piste">
         <button class="btn primary" id="musicAddBtn">Ajouter le lien</button>
         <button class="btn" id="musicImportBtn">Importer un fichier</button>
-        <input type="file" id="musicFile" accept="audio/*" style="display:none;">
+        <input type="file" id="musicFile" accept="audio/*">
       </div>
-      <div class="tools-note" id="importNote" style="margin-top:-0.6rem; margin-bottom:1rem;">Un fichier importé reste local à ton navigateur pour cette session — pas sauvegardé, pas partagé.</div>
-
+      <div class="tools-note" style="margin-top:-0.6rem;">Un fichier importé reste local à ton navigateur pour cette session — pas sauvegardé, pas partagé.</div>
       <div id="mixTracks"></div>
       <div id="extTracks"></div>
     </div>
@@ -630,6 +904,15 @@ async function renderGame(app, game){
       <div id="commentAction"></div>
     </div>
   `;
+
+  if(contentEditMode){
+    ['title','tagline','description','meta1Label','meta1','meta2Label','meta2'].forEach(f => {
+      const el = document.getElementById('f-' + f);
+      if(el) el.addEventListener('blur', () => updateGameField(game.id, f, el.textContent.trim()));
+    });
+    const linkInput = document.getElementById('f-link');
+    if(linkInput) linkInput.addEventListener('change', () => updateGameField(game.id, 'link', linkInput.value.trim()));
+  }
 
   initSessionTools(game);
   initAmbianceMixer();
@@ -655,7 +938,6 @@ async function renderGame(app, game){
       await loadAndRenderComments(game.id);
     });
   }
-
   if(firebaseReady){
     await loadAndRenderComments(game.id);
   } else {
@@ -712,7 +994,6 @@ function renderAuthPanel(app){
     }
   });
 }
-
 function translateAuthError(code){
   const map = {
     'auth/email-already-in-use': 'Cet email a déjà un compte.',
@@ -742,19 +1023,14 @@ async function renderAdmin(app){
       </div>
     </div>
   `).join('') : '<p style="color:var(--parchment-dim)">Aucune demande en attente.</p>';
-
-  list.querySelectorAll('[data-approve]').forEach(btn => {
-    btn.addEventListener('click', () => approveUser(btn.getAttribute('data-approve')));
-  });
-  list.querySelectorAll('[data-reject]').forEach(btn => {
-    btn.addEventListener('click', () => rejectUser(btn.getAttribute('data-reject')));
-  });
+  list.querySelectorAll('[data-approve]').forEach(btn => btn.addEventListener('click', () => approveUser(btn.getAttribute('data-approve'))));
+  list.querySelectorAll('[data-reject]').forEach(btn => btn.addEventListener('click', () => rejectUser(btn.getAttribute('data-reject'))));
 }
 
 window.addEventListener('hashchange', render);
 
 (async function init(){
-  await loadGames();
+  await initContent();
   renderAuthZone();
   render();
 })();
