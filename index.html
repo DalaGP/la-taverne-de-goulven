@@ -935,8 +935,14 @@ async function renderGame(app, game){
     document.getElementById('postCommentBtn').addEventListener('click', async () => {
       const text = document.getElementById('commentText').value.trim();
       if(!text) return;
-      await postComment(game.id, text);
-      await loadAndRenderComments(game.id);
+      try{
+        await postComment(game.id, text);
+        document.getElementById('commentText').value = '';
+        await loadAndRenderComments(game.id);
+      }catch(e){
+        console.error('Erreur publication commentaire:', e);
+        alert("Le commentaire n'a pas pu être publié : " + (e.message || e.code || e));
+      }
     });
   }
   if(firebaseReady){
@@ -957,7 +963,8 @@ async function loadAndRenderComments(gameId){
       </div>
     `).join('') : '<p style="color:var(--parchment-dim)">Aucun retour pour l\'instant — sois le premier.</p>';
   }catch(e){
-    list.innerHTML = '<p style="color:var(--parchment-dim)">Impossible de charger les commentaires pour le moment.</p>';
+    console.error('Erreur chargement commentaires:', e);
+    list.innerHTML = '<p style="color:var(--parchment-dim)">Impossible de charger les commentaires pour le moment. (' + escapeHtml(e.message || e.code || e) + ')</p>';
   }
 }
 
