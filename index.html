@@ -300,6 +300,7 @@ try{
     firebase.initializeApp(window.FIREBASE_CONFIG);
     auth = firebase.auth();
     db = firebase.firestore();
+    db.settings({ experimentalAutoDetectLongPolling: true });
     firebaseReady = true;
   }
 }catch(e){ console.error('Firebase non initialisé', e); }
@@ -657,7 +658,7 @@ function renderAuthZone(){
       <span>${escapeHtml(currentUser.email)}</span>
       <span class="role-badge ${currentRole === 'admin' ? 'admin' : ''}">${roleLabel}</span>
       ${currentRole === 'admin' ? `
-        <button class="btn ${contentEditMode ? 'primary' : ''}" id="editModeBtn">${contentEditMode ? 'Terminer l’édition' : 'Éditer le contenu'}</button>
+        <button class="btn ${contentEditMode ? 'primary' : ''}" id="editModeBtn">${contentEditMode ? 'Terminer l\u2019édition' : 'Éditer le contenu'}</button>
         <a href="#/admin" class="btn">Comptes</a>
       ` : ''}
       <button class="btn" id="logoutBtn">Se déconnecter</button>
@@ -799,7 +800,7 @@ function renderCatalogue(app){
     <div class="search-row">
       <input type="text" id="searchInput" placeholder="Chercher un jeu, un genre, un système…">
     </div>
-    ${contentEditMode ? '<div class="hint">Mode édition actif — coche l’étoile pour mettre un jeu en avant sur l’accueil, ou retire-le du catalogue.</div>' : ''}
+    ${contentEditMode ? '<div class="hint">Mode édition actif — coche l\u2019étoile pour mettre un jeu en avant sur l\u2019accueil, ou retire-le du catalogue.</div>' : ''}
     <div class="grid" id="gameGrid"></div>
   `;
 
