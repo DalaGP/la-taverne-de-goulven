@@ -300,7 +300,7 @@ try{
     firebase.initializeApp(window.FIREBASE_CONFIG);
     auth = firebase.auth();
     db = firebase.firestore();
-    db.settings({ experimentalAutoDetectLongPolling: true });
+    db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
     firebaseReady = true;
   }
 }catch(e){ console.error('Firebase non initialisé', e); }
